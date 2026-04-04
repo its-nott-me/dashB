@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  ANALYST
+  VIEWER
+}
+
+enum UserStatus {
+  ACTIVE 
+  INACTIVE
+}
+
+model User {
+  id            String        @id @default(uuid())
+  name          String 
+  email         String        @unique
+  passwordHash  String        @map("password_hash")             // postgresql uses snake_case
+  role          Role          @default(VIEWER)
+  status        UserStatus    @default(ACTIVE)
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  records       FinancialRecord[]
+
+  @@map("users")
+}
+
+enum RecordType {
+  INCOME
+  EXPENSE
+}
+
+model FinancialRecord {
+  id          String        @id @default(uuid())
+  amount      Int           // stored in paise
+  type        RecordType    
+  category    String
+  date        DateTime      @db.Date
+  description String?
+  isDeleted   Boolean       @default(false) @map("is_deleted")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  createdBy   String        @map("created_by")
+  creator     User          @relation(fields: [createdBy], references: [id])
+
+  @@index([type])
+  @@index([category])
+  @@index([date])
+  @@index([createdBy])
+  @@index([isDeleted])
+  @@map("financial_records")
+}
+
+
