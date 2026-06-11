@@ -8,6 +8,8 @@ import dashBoardRoutes from "./modules/dashboard/dashboard.routes.js";
 import errorHandler from "./middleware/errorHandler.js";
 import ApiError from "./utils/ApiError.js";
 import { rateLimiter } from "./middleware/rateLimiter.js";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger.js"
 
 const app = express();
 
@@ -26,6 +28,9 @@ app.use(rateLimiter);
 app.get("/api/v1/health", (req, res) => {
     res.json({ success: true, message: "Server is running " });
 });
+
+// Swagger UI route
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
